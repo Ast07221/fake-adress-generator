@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Address Generator</title>
+
+<style>
+body{
+    margin:0;
+    font-family:system-ui;
+    background:#0b0b0b;
+    color:#fff;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow-x:hidden;
+}
+
+.wrapper{
+    width:100%;
+    max-width:860px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px 20px 120px 20px;
+    box-sizing:border-box;
+    position:relative;
+}
+
+.output{
+    width:100%;
+    max-width:700px;
+    max-height:calc(100vh - 180px);
+    overflow-y:auto;
+    text-align:left;
+}
+
+.card{
+    padding:12px 0;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+.line{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+}
+
+.value{
+    font-family:monospace;
+    font-size:18px;
+    word-break:break-word;
+}
+
+.copy{
+    font-size:11px;
+    color:#777;
+    cursor:pointer;
+    user-select:none;
+}
+.copy:hover{
+    color:#fff;
+}
+
+.topbar{
+    position:fixed;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:16px;
+    align-items:center;
+}
+
+button{
+    background:#0b0b0b;
+    border:none;
+    color:#fff;
+    cursor:pointer;
+    font-size:14px;
+}
+
+input{
+    width:60px;
+    background:none;
+    border:none;
+    color:#fff;
+    text-align:center;
+}
+
+select{
+    background:#0b0b0b;
+    color:#fff;
+    border:none;
+}
+
+.loader{
+    position:absolute;
+    top:18%;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:11px;
+    letter-spacing:4px;
+    color:#777;
+    opacity:.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="loader" id="loader">GENERATING...</div>
+
+<div class="wrapper">
+    <div class="output" id="output"></div>
+</div>
+
+<div class="topbar">
+    <button onclick="generate()">generate</button>
+    <button onclick="copyAll()">copy</button>
+    <input id="count" type="number" value="5" min="1" max="50">
+
+    <select id="country">
+        <option value="US">USA</option>
+        <option value="UK">UK</option>
+        <option value="DE">Germany</option>
+        <option value="FR">France</option>
+        <option value="NL">Netherlands</option>
+        <option value="ES">Spain</option>
+        <option value="IT">Italy</option>
+    </select>
+</div>
+
+<script>
+
+const output = document.getElementById("output");
+const loader = document.getElementById("loader");
+
+let current = [];
+
+const data = {
+    US:{
+        city:["New York","Los Angeles","Chicago","Houston","Miami"],
+        street:["Main St","Oak Ave","Pine Rd","Market St","2nd Ave"],
+        zip:["10001","90001","60601","77001","33101"]
+    },
+    UK:{
+        city:["London","Manchester","Birmingham","Liverpool"],
+        street:["High Street","King Rd","Queen St","Church Ln"],
+        zip:["SW1A","M1 1AA","B1 1AA","L1 8JQ"]
+    },
+    DE:{
+        city:["Berlin","Munich","Hamburg","Cologne"],
+        street:["Hauptstrasse","Bahnhofstrasse","Berlin Str","Marktweg"],
+        zip:["10115","80331","20095","50667"]
+    },
+    FR:{
+        city:["Paris","Lyon","Marseille","Nice"],
+        street:["Rue de la Paix","Rue Victor Hugo","Avenue République"],
+        zip:["75001","69001","13001","06000"]
+    },
+    NL:{
+        city:["Amsterdam","Rotterdam","Utrecht"],
+        street:["Damrak","Leidsestraat","Kalverstraat"],
+        zip:["1012","3011","3511"]
+    },
+    ES:{
+        city:["Madrid","Barcelona","Valencia"],
+        street:["Calle Mayor","Gran Via","Calle Real"],
+        zip:["28001","08001","46001"]
+    },
+    IT:{
+        city:["Rome","Milan","Naples"],
+        street:["Via Roma","Via Milano","Corso Italia"],
+        zip:["00100","20100","80100"]
+    }
+};
+
+function random(arr){
+    return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function generateAddress(){
+    const country = document.getElementById("country").value;
+  const d = data[country];
+
+    const street = random(d.street);
+    const city = random(d.city);
+    const zip = random(d.zip);
+    const number = Math.floor(Math.random()*200 + 1);
+
+    return `${street} ${number}, ${city}, ${zip}, ${country}`;
+}
+
+function render(list){
+    output.innerHTML="";
+
+    list.forEach((addr,index)=>{
+        const card=document.createElement("div");
+        card.className="card";
+
+        card.innerHTML=`
+        <div class="line">
+            <div class="value" id="a${index}"></div>
+            <div class="copy" onclick="copy('${addr}')">copy</div>
+        </div>
+        `;
+
+        output.appendChild(card);
+
+        const target=document.getElementById(`a${index}`);
+
+        let i=0;
+        function type(){
+            if(i<addr.length){
+                target.textContent += addr[i];
+                i++;
+                setTimeout(type,6);
+            }
+        }
+
+        setTimeout(type,index*120);
+    });
+}
+
+function generate(){
+    loader.style.display="block";
+
+    setTimeout(()=>{
+        const count=Math.min(50, Math.max(1, parseInt(document.getElementById("count").value)||5));
+
+        const list=[];
+        for(let i=0;i<count;i++){
+            list.push(generateAddress());
+        }
+
+        current=list;
+        loader.style.display="none";
+        render(list);
+
+    },300);
+}
+
+function copy(text){
+    navigator.clipboard.writeText(text);
+}
+
+function copyAll(){
+    navigator.clipboard.writeText(current.join("\n"));
+}
+
+window.onload=generate;
+
+</script>
+
+</body>
+</html>
