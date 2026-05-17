@@ -136,6 +136,17 @@ select{
     50%{opacity:1;}
     100%{opacity:0;}
 }
+    .lineWrap{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+}
+
+.left{
+    display:flex;
+    flex-direction:column;
+}
 </style>
 </head>
 
@@ -242,9 +253,14 @@ function render(list){
         card.className="card";
 
         card.innerHTML=`
-            <span class="labelAddress">ADDRESS</span>
-            <div class="value" id="a${index}"></div>
-            <div class="copy" onclick="copy('${addr}')">copy</div>
+            <div class="lineWrap">
+                <div class="left">
+                    <span class="labelAddress">ADDRESS</span>
+                    <div class="value" id="a${index}"></div>
+                </div>
+
+                <div class="copy" onclick="copy('${addr}')">copy</div>
+            </div>
         `;
 
         output.appendChild(card);
