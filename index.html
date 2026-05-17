@@ -109,12 +109,34 @@ select{
     color:#777;
     opacity:.7;
 }
+    .dots span{
+    animation:blinkDots 1.2s infinite;
+}
+
+.dots span:nth-child(2){
+    animation-delay:0.2s;
+}
+
+.dots span:nth-child(3){
+    animation-delay:0.4s;
+}
+
+@keyframes blinkDots{
+    0%, 20%{opacity:0;}
+    50%{opacity:1;}
+    100%{opacity:0;}
+}
 </style>
 </head>
 
 <body>
 
-<div class="loader" id="loader">GENERATING...</div>
+<div class="loader" id="loader">
+    GENERATING
+    <span class="dots">
+        <span>.</span><span>.</span><span>.</span>
+    </span>
+</div>
 
 <div class="wrapper">
     <div class="output" id="output"></div>
@@ -193,11 +215,10 @@ function generateAddress(){
 
     const street = random(d.street);
     const city = random(d.city);
-    const zip = random(d.zip);
+    const zip = d.zip ? random(d.zip) : "00000";
 
     const number = Math.floor(Math.random()*999 + 1);
 
-    // иногда добавляем apartment / suite (реализм)
     const addUnit = Math.random() > 0.6;
     const unit = addUnit
         ? `, Apt ${Math.floor(Math.random()*50 + 1)}`
