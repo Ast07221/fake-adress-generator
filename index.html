@@ -146,8 +146,10 @@ let current = [];
 const data = {
     US:{
         city:["New York","Los Angeles","Chicago","Houston","Miami"],
-        street:["Main St","Oak Ave","Pine Rd","Market St","2nd Ave"],
-        zip:["10001","90001","60601","77001","33101"]
+        street:[
+"Main Street","Oak Street","Maple Avenue","Pine Street","Cedar Road",
+"High Street","Church Street","Station Road","Park Lane","King Street"
+]
     },
     UK:{
         city:["London","Manchester","Birmingham","Liverpool"],
@@ -187,14 +189,21 @@ function random(arr){
 
 function generateAddress(){
     const country = document.getElementById("country").value;
-  const d = data[country];
+    const d = data[country];
 
     const street = random(d.street);
     const city = random(d.city);
     const zip = random(d.zip);
-    const number = Math.floor(Math.random()*200 + 1);
 
-    return `${street} ${number}, ${city}, ${zip}, ${country}`;
+    const number = Math.floor(Math.random()*999 + 1);
+
+    // иногда добавляем apartment / suite (реализм)
+    const addUnit = Math.random() > 0.6;
+    const unit = addUnit
+        ? `, Apt ${Math.floor(Math.random()*50 + 1)}`
+        : "";
+
+    return `ADDRESS: ${street} ${number}${unit}, ${city}, ${zip}, ${country}`;
 }
 
 function render(list){
@@ -220,11 +229,11 @@ function render(list){
             if(i<addr.length){
                 target.textContent += addr[i];
                 i++;
-                setTimeout(type,6);
+                setTimeout(type,5);
             }
         }
 
-        setTimeout(type,index*120);
+        setTimeout(type,index*100);
     });
 }
 
