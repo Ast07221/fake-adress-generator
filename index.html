@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Address Generator</title>
+<title>Address Generator Pro</title>
 
 <style>
 body{
@@ -44,16 +44,25 @@ body{
     border-bottom:1px solid rgba(255,255,255,0.06);
 }
 
-/* LABEL (ADDRESS) */
-.labelAddress{
-    color:#7a7a7a;
-    font-size:12px;
-    letter-spacing:2px;
-    display:block;
-    margin-bottom:4px;
+.lineWrap{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
 }
 
-/* VALUE */
+.left{
+    display:flex;
+    flex-direction:column;
+}
+
+.labelAddress{
+    color:#7a7a7a;
+    font-size:11px;
+    letter-spacing:2px;
+    margin-bottom:3px;
+}
+
 .value{
     font-family:monospace;
     font-size:18px;
@@ -61,19 +70,16 @@ body{
     word-break:break-word;
 }
 
-/* COPY */
 .copy{
     font-size:11px;
     color:#777;
     cursor:pointer;
     user-select:none;
-    margin-top:6px;
 }
 .copy:hover{
     color:#fff;
 }
 
-/* TOPBAR */
 .topbar{
     position:fixed;
     bottom:25px;
@@ -106,7 +112,6 @@ select{
     border:none;
 }
 
-/* LOADER */
 .loader{
     position:absolute;
     top:18%;
@@ -118,34 +123,17 @@ select{
     opacity:.8;
 }
 
-/* DOTS ANIMATION */
 .dots span{
     animation:blinkDots 1.2s infinite;
 }
 
-.dots span:nth-child(2){
-    animation-delay:0.2s;
-}
-
-.dots span:nth-child(3){
-    animation-delay:0.4s;
-}
+.dots span:nth-child(2){animation-delay:.2s;}
+.dots span:nth-child(3){animation-delay:.4s;}
 
 @keyframes blinkDots{
     0%,20%{opacity:0;}
     50%{opacity:1;}
     100%{opacity:0;}
-}
-    .lineWrap{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:12px;
-}
-
-.left{
-    display:flex;
-    flex-direction:column;
 }
 </style>
 </head>
@@ -182,41 +170,42 @@ select{
 const output = document.getElementById("output");
 const loader = document.getElementById("loader");
 let current = [];
+let history = new Set();
 
 const data = {
     US:{
-        city:["New York","Los Angeles","Chicago","Houston","Miami"],
-        street:["Main Street","Oak Street","Maple Avenue","Pine Street","Cedar Road","Park Avenue","King Street"],
+        cities:["New York","Los Angeles","Chicago","Houston","Miami"],
+        streets:["Main St","Oak St","Maple Ave","Pine St","Cedar Rd","Park Ave","King St"],
         zip:["10001","90001","60601","77001","33101"]
     },
     UK:{
-        city:["London","Manchester","Birmingham","Liverpool"],
-        street:["High Street","King Road","Queen Street","Church Lane","Station Road"],
+        cities:["London","Manchester","Birmingham","Liverpool"],
+        streets:["High Street","King Road","Queen Street","Church Lane","Station Road"],
         zip:["SW1A","M1 1AA","B1 1AA","L1 8JQ"]
     },
     DE:{
-        city:["Berlin","Munich","Hamburg","Cologne"],
-        street:["Hauptstrasse","Bahnhofstrasse","Alexanderplatz","Marktweg"],
+        cities:["Berlin","Munich","Hamburg","Cologne"],
+        streets:["Hauptstrasse","Bahnhofstrasse","Marktweg","Friedrichstrasse"],
         zip:["10115","80331","20095","50667"]
     },
     FR:{
-        city:["Paris","Lyon","Marseille","Nice"],
-        street:["Rue de la Paix","Rue Victor Hugo","Avenue République","Boulevard Saint-Michel"],
+        cities:["Paris","Lyon","Marseille","Nice"],
+        streets:["Rue de la Paix","Rue Victor Hugo","Avenue République","Boulevard Saint-Michel"],
         zip:["75001","69001","13001","06000"]
     },
     NL:{
-        city:["Amsterdam","Rotterdam","Utrecht"],
-        street:["Damrak","Leidsestraat","Kalverstraat","Prinsengracht"],
+        cities:["Amsterdam","Rotterdam","Utrecht"],
+        streets:["Damrak","Leidsestraat","Kalverstraat","Prinsengracht"],
         zip:["1012","3011","3511"]
     },
     ES:{
-        city:["Madrid","Barcelona","Valencia"],
-        street:["Calle Mayor","Gran Via","Calle Real","Paseo del Prado"],
+        cities:["Madrid","Barcelona","Valencia"],
+        streets:["Calle Mayor","Gran Via","Calle Real","Paseo del Prado"],
         zip:["28001","08001","46001"]
     },
     IT:{
-        city:["Rome","Milan","Naples"],
-        street:["Via Roma","Via Milano","Corso Italia","Via Nazionale"],
+        cities:["Rome","Milan","Naples"],
+        streets:["Via Roma","Via Milano","Corso Italia","Via Nazionale"],
         zip:["00100","20100","80100"]
     }
 };
@@ -225,24 +214,58 @@ function random(arr){
     return arr[Math.floor(Math.random()*arr.length)];
 }
 
+function formatAddress(country, d){
+    const street = random(d.streets);
+    const city = random(d.cities);
+    const zip = random(d.zip);
+    const number = Math.floor(Math.random()*999 + 1);
+    const apt = Math.random()>0.7 ? `, Apt ${Math.floor(Math.random()*40+1)}` : "";
+
+    // SaaS-level formatting per country
+    if(country==="US"){
+        return `${number} ${street}${apt}, ${city}, ${zip}, USA`;
+    }
+    if(country==="UK"){
+        return `${number} ${street}${apt}, ${city}, ${zip}, UK`;
+    }
+    if(country==="DE"){
+        return `${street} ${number}${apt}, ${zip} ${city}, Germany`;
+    }
+    if(country==="FR"){
+        return `${number} ${street}${apt}, ${zip} ${city}, France`;
+    }
+    if(country==="NL"){
+        return `${street} ${number}${apt}, ${zip} ${city}, Netherlands`;
+    }
+    if(country==="ES"){
+        return `${street} ${number}${apt}, ${city} ${zip}, Spain`;
+    }
+    if(country==="IT"){
+        return `${street} ${number}${apt}, ${zip} ${city}, Italy`;
+    }
+}
+
 function generateAddress(){
     const country = document.getElementById("country").value;
     const d = data[country];
 
-    const street = random(d.street);
-    const city = random(d.city);
+    let addr;
+    let tries = 0;
 
-    // FIX: no more 00000
-    const zip = d.zip ? random(d.zip) : "—";
+    // anti-duplicate logic
+    do {
+        addr = formatAddress(country, d);
+        tries++;
+    } while(history.has(addr) && tries < 10);
 
-    const number = Math.floor(Math.random()*999 + 1);
+    history.add(addr);
 
-    const addUnit = Math.random() > 0.65;
-    const unit = addUnit
-        ? `, Apt ${Math.floor(Math.random()*50 + 1)}`
-        : "";
+    // memory limit
+    if(history.size > 200){
+        history.clear();
+    }
 
-    return `${street} ${number}${unit}, ${city}, ${zip}, ${country}`;
+    return addr;
 }
 
 function render(list){
@@ -258,7 +281,6 @@ function render(list){
                     <span class="labelAddress">ADDRESS</span>
                     <div class="value" id="a${index}"></div>
                 </div>
-
                 <div class="copy" onclick="copy('${addr}')">copy</div>
             </div>
         `;
@@ -270,13 +292,12 @@ function render(list){
         let i=0;
         function type(){
             if(i<addr.length){
-                target.textContent += addr[i];
-                i++;
+                target.textContent += addr[i++];
                 setTimeout(type,4);
             }
         }
 
-        setTimeout(type,index*90);
+        setTimeout(type,index*80);
     });
 }
 
@@ -295,7 +316,7 @@ function generate(){
         loader.style.display="none";
         render(list);
 
-    },300);
+    },250);
 }
 
 function copy(text){
@@ -312,3 +333,4 @@ window.onload=generate;
 
 </body>
 </html>
+        
