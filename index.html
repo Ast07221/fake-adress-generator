@@ -231,7 +231,7 @@ function generateAddress(){
         ? `, Apt ${Math.floor(Math.random()*50 + 1)}`
         : "";
 
-    return `ADDRESS: ${street} ${number}${unit}, ${city}, ${zip}, ${country}`;
+    return `${street} ${number}${unit}, ${city}, ${zip}, ${country}`;
 }
 
 function render(list){
