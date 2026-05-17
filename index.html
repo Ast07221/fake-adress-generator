@@ -44,29 +44,36 @@ body{
     border-bottom:1px solid rgba(255,255,255,0.06);
 }
 
-.line{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:10px;
+/* LABEL (ADDRESS) */
+.labelAddress{
+    color:#7a7a7a;
+    font-size:12px;
+    letter-spacing:2px;
+    display:block;
+    margin-bottom:4px;
 }
 
+/* VALUE */
 .value{
     font-family:monospace;
     font-size:18px;
+    color:#cfcfcf;
     word-break:break-word;
 }
 
+/* COPY */
 .copy{
     font-size:11px;
     color:#777;
     cursor:pointer;
     user-select:none;
+    margin-top:6px;
 }
 .copy:hover{
     color:#fff;
 }
 
+/* TOPBAR */
 .topbar{
     position:fixed;
     bottom:25px;
@@ -99,6 +106,7 @@ select{
     border:none;
 }
 
+/* LOADER */
 .loader{
     position:absolute;
     top:18%;
@@ -107,9 +115,11 @@ select{
     font-size:11px;
     letter-spacing:4px;
     color:#777;
-    opacity:.7;
+    opacity:.8;
 }
-    .dots span{
+
+/* DOTS ANIMATION */
+.dots span{
     animation:blinkDots 1.2s infinite;
 }
 
@@ -122,7 +132,7 @@ select{
 }
 
 @keyframes blinkDots{
-    0%, 20%{opacity:0;}
+    0%,20%{opacity:0;}
     50%{opacity:1;}
     100%{opacity:0;}
 }
@@ -133,9 +143,7 @@ select{
 
 <div class="loader" id="loader">
     GENERATING
-    <span class="dots">
-        <span>.</span><span>.</span><span>.</span>
-    </span>
+    <span class="dots"><span>.</span><span>.</span><span>.</span></span>
 </div>
 
 <div class="wrapper">
@@ -162,45 +170,42 @@ select{
 
 const output = document.getElementById("output");
 const loader = document.getElementById("loader");
-
 let current = [];
 
 const data = {
     US:{
         city:["New York","Los Angeles","Chicago","Houston","Miami"],
-        street:[
-"Main Street","Oak Street","Maple Avenue","Pine Street","Cedar Road",
-"High Street","Church Street","Station Road","Park Lane","King Street"
-]
+        street:["Main Street","Oak Street","Maple Avenue","Pine Street","Cedar Road","Park Avenue","King Street"],
+        zip:["10001","90001","60601","77001","33101"]
     },
     UK:{
         city:["London","Manchester","Birmingham","Liverpool"],
-        street:["High Street","King Rd","Queen St","Church Ln"],
+        street:["High Street","King Road","Queen Street","Church Lane","Station Road"],
         zip:["SW1A","M1 1AA","B1 1AA","L1 8JQ"]
     },
     DE:{
         city:["Berlin","Munich","Hamburg","Cologne"],
-        street:["Hauptstrasse","Bahnhofstrasse","Berlin Str","Marktweg"],
+        street:["Hauptstrasse","Bahnhofstrasse","Alexanderplatz","Marktweg"],
         zip:["10115","80331","20095","50667"]
     },
     FR:{
         city:["Paris","Lyon","Marseille","Nice"],
-        street:["Rue de la Paix","Rue Victor Hugo","Avenue République"],
+        street:["Rue de la Paix","Rue Victor Hugo","Avenue République","Boulevard Saint-Michel"],
         zip:["75001","69001","13001","06000"]
     },
     NL:{
         city:["Amsterdam","Rotterdam","Utrecht"],
-        street:["Damrak","Leidsestraat","Kalverstraat"],
+        street:["Damrak","Leidsestraat","Kalverstraat","Prinsengracht"],
         zip:["1012","3011","3511"]
     },
     ES:{
         city:["Madrid","Barcelona","Valencia"],
-        street:["Calle Mayor","Gran Via","Calle Real"],
+        street:["Calle Mayor","Gran Via","Calle Real","Paseo del Prado"],
         zip:["28001","08001","46001"]
     },
     IT:{
         city:["Rome","Milan","Naples"],
-        street:["Via Roma","Via Milano","Corso Italia"],
+        street:["Via Roma","Via Milano","Corso Italia","Via Nazionale"],
         zip:["00100","20100","80100"]
     }
 };
@@ -215,11 +220,13 @@ function generateAddress(){
 
     const street = random(d.street);
     const city = random(d.city);
-    const zip = d.zip ? random(d.zip) : "00000";
+
+    // FIX: no more 00000
+    const zip = d.zip ? random(d.zip) : "—";
 
     const number = Math.floor(Math.random()*999 + 1);
 
-    const addUnit = Math.random() > 0.6;
+    const addUnit = Math.random() > 0.65;
     const unit = addUnit
         ? `, Apt ${Math.floor(Math.random()*50 + 1)}`
         : "";
@@ -235,10 +242,9 @@ function render(list){
         card.className="card";
 
         card.innerHTML=`
-        <div class="line">
+            <span class="labelAddress">ADDRESS</span>
             <div class="value" id="a${index}"></div>
             <div class="copy" onclick="copy('${addr}')">copy</div>
-        </div>
         `;
 
         output.appendChild(card);
@@ -250,11 +256,11 @@ function render(list){
             if(i<addr.length){
                 target.textContent += addr[i];
                 i++;
-                setTimeout(type,5);
+                setTimeout(type,4);
             }
         }
 
-        setTimeout(type,index*100);
+        setTimeout(type,index*90);
     });
 }
 
